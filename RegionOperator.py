@@ -15,15 +15,15 @@ class Region:
         self.texture_hist = np.array([])
 
     def add_point(self, x, y, point_color, point_angle):
-        self.rect.expand(x, y)
-        self.size += 1
-        self.point_color = np.vstack((self.point_color, point_color))
-        self.point_angle = np.vstack((self.point_angle, point_angle))
+        self.rect.expand(x, y) # Expand a rectangle
+        self.size += 1 # Increase the size of the region
+        self.point_color = np.vstack((self.point_color, point_color)) # Adds colour to the point
+        self.point_angle = np.vstack((self.point_angle, point_angle)) # Adds angle to the point
 
     def calc_colour_hist(self):
-        BINS = 25
+        BINS = 25 
         RANGES = [(0.0, 180.0), (0.0, 255.0), (0.0, 255.0)]
-        point_color_num, channel = self.point_color.shape
+        point_color_num, channel = self.point_color.shape 
 
         colour_hist = np.array([])
 
@@ -31,7 +31,7 @@ class Region:
             hist = np.histogram(self.point_color[:, c], BINS, RANGES[c])[0]
             colour_hist = np.hstack((colour_hist, hist))
 
-        colour_hist_l1norm = np.linalg.norm(colour_hist, 1)
+        colour_hist_l1norm = np.linalg.norm(colour_hist, 1) # Calculates L1 norm
 
         self.colour_hist = colour_hist / colour_hist_l1norm
 
@@ -42,9 +42,11 @@ class Region:
         ORIENTATION = 8
         point_angle_num, channel = self.point_angle.shape
 
-        angle_idx = (self.point_angle // DIR_CONVERT_NUM) % ORIENTATION
+        angle_idx = (self.point_angle // DIR_CONVERT_NUM) % ORIENTATION # Index of the angle
         
         angle_hist = []
+
+        # Initislizing
         for o in range(ORIENTATION):
             angle_hist.append([])
             for c in range(channel):
@@ -69,18 +71,19 @@ class Region:
 def find_same_label_region(rgset, label):
     for idx in range(len(rgset)):
         if rgset[idx].label == label:
-            return idx
+            return idx # Check whether there are same label regions
 
     return -1
 
 def has_same_rect_region(rgset, rect):
-    for rg in rgset:
+    for rg in rgset: # Checks whether theree exists same rectangle region
         if rto.is_same(rg.rect, rect):
             return True
 
     return False
 
 def merge_region(rg1, rg2):
+    # Merges two rectangular region into one
     new_label = rg1.label + rg2.label
     new_rect = rto.Rect(rg1.rect.left, rg1.rect.top, rg1.rect.right, rg1.rect.bottom)
     new_rect.expand(rg2.rect.left, rg2.rect.top)
@@ -99,6 +102,7 @@ def merge_region(rg1, rg2):
     return new_region
 
 def extract_region(img, ufset):
+    # Extract the region
     height, width, channel = img.shape
 
     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -125,6 +129,7 @@ def extract_region(img, ufset):
     return rgset
 
 def extract_neighbour(rgset):
+    # Get the neighbour
     nbset = []
 
     for i in range(len(rgset)):
